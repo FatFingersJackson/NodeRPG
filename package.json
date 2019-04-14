@@ -1,0 +1,30 @@
+{
+  "name": "noderpg",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FatFingersJackson/NodeRPG.git"
+  },
+  "author": "fatfingersjackson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FatFingersJackson/NodeRPG/issues"
+  },
+  "homepage": "https://github.com/FatFingersJackson/NodeRPG#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.4",
+    "dotenv": "^7.0.0",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "express-session": "^1.16.1",
+    "mongoose": "^5.5.1",
+    "session": "^0.1.0",
+    "socket.io": "^2.2.0"
+  }
+}
