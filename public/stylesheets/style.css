@@ -1,3 +1,32 @@
 .errors{
     color: red;
 }
+*{
+    margin: 0;
+}
+html, body{
+    height:100%;
+    width: 100%;
+}
+
+header{
+    position: relative;
+    height: 15%;
+    border-bottom: solid 1px gray;
+    text-align: end;
+    padding-right: 5%;
+    min-height: 22px;
+    
+}
+header > *{
+    position: relative;
+    top: 30%;
+}
+main{
+    height: 70%;
+}
+
+footer{
+    height: 15%;
+    border-top: solid 1px gray;
+}

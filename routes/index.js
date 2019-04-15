@@ -67,7 +67,9 @@ router.post('/login',function(req,res,next){
     
     var pwd = req.body.password || "";
     
-    User.findOne({username:uname}, function(err, user){
+    // Use regex for case-insensitive query with usernames
+    //"/^"+uname+"$/i"
+    User.findOne({username: new RegExp(uname,"i") }, function(err, user){
         
         if(err) return res.status(500).send('Error on the server');
         //if(!user) return res.status(404).send('No user found')
@@ -107,7 +109,15 @@ router.get('/', checkSession ,function(req, res,next) {
 
     //sess.pass = ":)"
     
-    res.render('client')
+    let title = "test";
+    let file = 'part.ejs'
+    res.render('template',{
+        title: title,
+        file: file
+    });
+
+
+    //res.render('client')
 });
 
 router.get('/register', function(req,res,next){
@@ -160,6 +170,26 @@ router.post('/register', function(req,res,next){
 });
 
 
+router.get('/logout',function(req,res){
+
+    req.session.destroy(function(err) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.redirect('/'); //takaisin juureen eli kirjautumaan
+        }
+    });
+
+});
+
+router.get('/test',function(req,res,next){
+    let title = "test";
+    let file = 'part.ejs'
+    res.render('template',{
+        title: title,
+        file: file
+    });
+})
 // --  -- -- -- //
 /*
 router.get('/me', VerifyToken ,function(req, res,next){
