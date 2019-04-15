@@ -15,7 +15,7 @@ mongoose.connect(connString,
     function(err){
     if(err){throw err;}
 
-    console.log("Connect to mongoose");
+    console.log("Connect to database");
 });
 
 module.exports = mongoose;

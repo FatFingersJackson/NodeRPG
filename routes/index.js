@@ -25,7 +25,7 @@ function checkSession(req,res,next)
             }
 
             // OK
-            console.log(decoded);
+            //console.log(decoded);
             next();
         })
     }
@@ -99,25 +99,14 @@ router.get('/', checkSession ,function(req, res,next) {
     
     let sess = req.session;
 
-    if( sess.token )
-    {
-
-    }
-    else{
-        return res.redirect('login')
-    }
-
     //sess.pass = ":)"
     
-    let title = "test";
-    let file = 'part.ejs'
+    let title = "Game";
+    let file = 'game.ejs'
     res.render('template',{
         title: title,
         file: file
     });
-
-
-    //res.render('client')
 });
 
 router.get('/register', function(req,res,next){
@@ -176,6 +165,7 @@ router.get('/logout',function(req,res){
         if (err) {
             console.log(err);
         } else {
+            console.log("logged out");
             res.redirect('/'); //takaisin juureen eli kirjautumaan
         }
     });

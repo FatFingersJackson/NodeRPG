@@ -1,0 +1,114 @@
+<div>
+
+    <table id="gameboard">
+        
+    </table>
+
+
+<script>
+
+// USED TO CHECK MOVEMENT
+
+/*
+function mapObject(x,y, name ,blocks, objectClass )
+{
+    this.x = x || -1 ;
+    this.y = y || -1;
+    this.blocking = blocks || false;
+    this.objectClass = objectClass || "defaultObject";
+}
+*/
+
+let sampleObjects = [
+    {
+        x: 2,
+        y: 7,
+        blocking : true,
+        objectClass :"slime_red",
+        name: "Red Slime"
+    },
+    {
+        x: 3,
+        y: 6,
+        blocking : true,
+        objectClass : "water_deep",
+        name: "Deep Water"   
+    }
+];
+
+var sampleMap = {
+    height: 10,
+    width: 10,
+    terrain: "grass",
+    mapObjects : sampleObjects, // <- for spawning
+    tiles : [] // <- for gameplay queries
+}
+
+// Above values will be loaded from file 
+// Current map will be assigned to a variable 
+const map = sampleMap;
+
+var tileGrid = "";
+for (i = 0 ; i < map.height;i++)
+{
+    tileGrid += '<tr>';
+    for(var j = 0; j < map.width; j++)
+    {
+        tileGrid += `<td class="gametile ${map.terrain}" id="${j}-${i}"></td>`;
+    }
+    tileGrid += '</tr>';
+}
+//console.log('x-y'.split('-')[1])
+$('#gameboard').append(tileGrid)
+
+// Place objects in map. Also move map.objects to map.tiles
+// Map.objects is easier to write and view, but logic is easier with .tiles
+for(var i = 0; i < map.mapObjects.length; i++ )
+{
+    let o = map.mapObjects[i];
+
+    let tileid = o.x + "-" + o.y;
+    // TODO needs ID
+    var mapO = `<div id="o${i}" class="${o.objectClass}"></div>`
+    $('#'+tileid).append(mapO);
+}
+
+$(document).keypress(function(e) {
+  
+    movePlayer(e.which)
+});
+
+function movePlayer(dirInt){
+    
+    switch (dirInt) {
+        //W
+        case 119:
+            
+            break;
+            //A
+        case 97:
+            break;
+            //D
+        case 100:
+            
+            break;
+            //S
+        case 115:
+            
+            break;
+        default:
+            break;
+    }
+}
+
+function spawnPlayer()
+{
+    var player = '<div id="mainplayer" class="player"><img class="avatar" src="images/stiki.png"/></div>';
+    $('#0-0').append(player);
+}
+
+spawnPlayer();
+
+
+</script>
+</div>

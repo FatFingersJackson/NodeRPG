@@ -11,11 +11,14 @@ html, body{
 
 header{
     position: relative;
-    height: 15%;
+    background-color: white;
+    
+    width: 100%;
     border-bottom: solid 1px gray;
     text-align: end;
     padding-right: 5%;
-    min-height: 22px;
+    
+    height: 40px;
     
 }
 header > *{
@@ -23,10 +26,65 @@ header > *{
     top: 30%;
 }
 main{
-    height: 70%;
+    height: (100% - 80px);
+    padding: 10px 0 22px 10px;
+    overflow: scroll;
 }
 
 footer{
-    height: 15%;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
     border-top: solid 1px gray;
+    background-color: white;
+}
+
+
+
+/*GAMING WINDOW*/
+
+#gameboard{
+    border: solid 1px gray;
+}
+
+#gameboard{
+    border-collapse: collapse;
+}
+
+.gametile{
+    height: 40px;
+    width:40px;
+    border: solid;
+
+}
+
+/* TERRAIN */
+
+.grass{
+    background: green;
+}
+.water_deep{
+    background: lightblue;
+    width:100%;
+    height: 100%;
+    
+}
+
+.slime_red{
+    position: relative;
+    background-color: red;
+    height: 80%;
+    width: 80%;
+    border-radius: 50%;
+    margin: auto;
+}
+
+.player{
+    height: 100%;
+    width: 100%;
+}
+.player .avatar{
+    height: 100%;
+    width: 100%;
 }
