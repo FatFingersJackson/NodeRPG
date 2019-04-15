@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
-// TODO ota selvää
-// require ('dotenv').config();
 
+require('dotenv').config();
+let connString = process.env.MONGOCONNECT;
 
 // -- CONNECT DATABASE -->
 
-mongoose.connect('mongodb://localhost/noderpg', 
+mongoose.connect(connString, 
     {
         useNewUrlParser: true, 
         useFindAndModify: false,
