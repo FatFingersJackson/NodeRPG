@@ -25,7 +25,7 @@ function checkSession(req,res,next)
             }
 
             // OK
-            //console.log(decoded);
+            session.username = decoded.username;
             next();
         })
     }
@@ -99,13 +99,16 @@ router.get('/', checkSession ,function(req, res,next) {
     
     let sess = req.session;
 
-    //sess.pass = ":)"
+    // TODO move elsewhere
+
+    
     
     let title = "Game";
     let file = 'game.ejs'
     res.render('template',{
         title: title,
-        file: file
+        file: file,
+        username: req.session.username
     });
 });
 

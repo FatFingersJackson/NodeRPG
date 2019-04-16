@@ -1,23 +1,19 @@
-<div>
+<div id="gamesection">
 
     <table id="gameboard">
         
     </table>
 
+    <div id="messagedialog" hidden>
+        
+    </div>
+
+</div>
 
 <script>
 
-// USED TO CHECK MOVEMENT
 
-/*
-function mapObject(x,y, name ,blocks, objectClass )
-{
-    this.x = x || -1 ;
-    this.y = y || -1;
-    this.blocking = blocks || false;
-    this.objectClass = objectClass || "defaultObject";
-}
-*/
+
 
 let sampleObjects = [
     {
@@ -43,14 +39,17 @@ var sampleMap = {
     mapObjects : sampleObjects, // <- for spawning
     tiles : [] // <- for gameplay queries
 }
-
+// ------ --------/////
 // Above values will be loaded from file 
 // Current map will be assigned to a variable 
+// ------ --------/////
+
 const map = sampleMap;
 
 var tileGrid = "";
 for (i = 0 ; i < map.height;i++)
 {
+    map.tiles[i] = [];
     tileGrid += '<tr>';
     for(var j = 0; j < map.width; j++)
     {
@@ -66,49 +65,105 @@ $('#gameboard').append(tileGrid)
 for(var i = 0; i < map.mapObjects.length; i++ )
 {
     let o = map.mapObjects[i];
-
+    map.tiles[o.y][o.x] = o;
     let tileid = o.x + "-" + o.y;
     // TODO needs ID
     var mapO = `<div id="o${i}" class="${o.objectClass}"></div>`
     $('#'+tileid).append(mapO);
 }
 
+/*-- PLAYER ---*/
+
+const mainPlayer = {
+    x:0,
+    y:0,
+    avatar:'<div id="mainplayer" class="player"><img class="avatar" src="images/stiki.png"/></div>',
+    char: null,
+    spawn: function(x,y){
+        
+        if( map.tiles[this.y][this.x] != null  )
+        {
+            // A logic to search empty space
+        }
+         this.char = $(this.avatar);
+         $(`#${this.x}-${this.y}`).append( this.char );  
+    },
+    move: function(x,y){
+        
+        let xDest = x + this.x;
+        let yDest = y+ this.y;
+        
+        
+
+        if( map.tiles[yDest] == null || map.tiles[yDest][xDest] != null  )
+        {
+            
+            return;
+        }
+        this.x = xDest;
+        this.y = yDest;
+        
+        $(`#${xDest}-${yDest}`).append( $(this.char) );  
+    }
+};
+
+mainPlayer.spawn();
+
+
 $(document).keypress(function(e) {
-  
+    clearMessage();
     movePlayer(e.which)
 });
 
+$(document).on('click', function(){
+    clearMessage();
+})
+
+
 function movePlayer(dirInt){
-    
+
     switch (dirInt) {
         //W
         case 119:
-            
+            mainPlayer.move(0,-1);
             break;
             //A
         case 97:
+            mainPlayer.move(-1,0);
             break;
             //D
         case 100:
-            
+            mainPlayer.move(1,0);
             break;
             //S
         case 115:
-            
+            mainPlayer.move(0,1);
             break;
         default:
             break;
     }
 }
 
-function spawnPlayer()
+function showMessage(message)
 {
-    var player = '<div id="mainplayer" class="player"><img class="avatar" src="images/stiki.png"/></div>';
-    $('#0-0').append(player);
+    $('#messagedialog').html(message)
+    $('#messagedialog').show();
 }
 
-spawnPlayer();
+function clearMessage()
+{
+    $('#messagedialog').hide();
+}
+
+socket.on('connect',function(){
+    socket.emit('playerUpdated',{ username: playerUsername })
+});
+
+socket.on('message',function(data){
+              
+                showMessage(data.message);
+            });
+
 
 
 </script>
-</div>
