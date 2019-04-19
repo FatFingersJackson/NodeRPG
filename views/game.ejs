@@ -44,40 +44,53 @@ var sampleMap = {
 // Current map will be assigned to a variable 
 // ------ --------/////
 
-const map = sampleMap;
+//const map = sampleMap;
 
-var tileGrid = "";
-for (i = 0 ; i < map.height;i++)
+
+function draMap(map)
 {
-    map.tiles[i] = [];
-    tileGrid += '<tr>';
-    for(var j = 0; j < map.width; j++)
+    var tileGrid = "";
+    for (i = 0 ; i < map.height;i++)
     {
-        tileGrid += `<td class="gametile ${map.terrain}" id="${j}-${i}"></td>`;
+        map.tiles[i] = [];
+        tileGrid += '<tr>';
+        for(var j = 0; j < map.width; j++)
+        {
+            tileGrid += `<td class="gametile ${map.terrain}" id="${j}-${i}"></td>`;
+            
+        }
+        tileGrid += '</tr>';
     }
-    tileGrid += '</tr>';
-}
-//console.log('x-y'.split('-')[1])
-$('#gameboard').append(tileGrid)
+    //console.log('x-y'.split('-')[1])
+    $('#gameboard').html(tileGrid)
 
-// Place objects in map. Also move map.objects to map.tiles
-// Map.objects is easier to write and view, but logic is easier with .tiles
-for(var i = 0; i < map.mapObjects.length; i++ )
-{
-    let o = map.mapObjects[i];
-    map.tiles[o.y][o.x] = o;
-    let tileid = o.x + "-" + o.y;
-    // TODO needs ID
-    var mapO = `<div id="o${i}" class="${o.objectClass}"></div>`
-    $('#'+tileid).append(mapO);
+    // Place objects in map. Also move map.objects to map.tiles
+    // Map.objects is easier to write and view, but logic is easier with .tiles
+    for(var i = 0; i < map.mapObjects.length; i++ )
+    {
+        let o = map.mapObjects[i];
+        let x = o.x || 0;
+        let y = o.y || 0;
+        map.tiles[y][x] = o;
+        let tileid = o.x + "-" + o.y;
+        // TODO needs ID
+        var mapO = `<div id="o${i}" class="${o.objectClass}"></div>`
+        if(o.avatar)
+        {
+            $(map0).append( `<img class="avatar" src="./images/${o.avatar}" />` )
+        }
+        $('#'+tileid).append(mapO);
+    }
 }
+
+
 
 /*-- PLAYER ---*/
-
+/*
 const mainPlayer = {
     x:0,
     y:0,
-    avatar:'<div id="mainplayer" class="player"><img class="avatar" src="images/stiki.png"/></div>',
+    avatar:`<div id="${playerUsername}" class="player"><img class="avatar" src="images/stiki.png"/></div>`,
     char: null,
     spawn: function(x,y){
         
@@ -93,8 +106,6 @@ const mainPlayer = {
         let xDest = x + this.x;
         let yDest = y+ this.y;
         
-        
-
         if( map.tiles[yDest] == null || map.tiles[yDest][xDest] != null  )
         {
             
@@ -108,7 +119,7 @@ const mainPlayer = {
 };
 
 mainPlayer.spawn();
-
+*/
 
 $(document).keypress(function(e) {
     clearMessage();
@@ -119,7 +130,7 @@ $(document).on('click', function(){
     clearMessage();
 })
 
-
+// These movefunctions are kind of single player
 function movePlayer(dirInt){
 
     switch (dirInt) {
@@ -156,7 +167,7 @@ function clearMessage()
 }
 
 socket.on('connect',function(){
-    socket.emit('playerUpdated',{ username: playerUsername })
+    socket.emit('playerSpawned',{ username: playerUsername })
 });
 
 socket.on('message',function(data){
@@ -164,6 +175,35 @@ socket.on('message',function(data){
                 showMessage(data.message);
             });
 
+socket.on('loadMap',function(data){
+    console.log("loaded map",data.map)
+    draMap(data.map)
+});
+
+socket.on('mapUpdate', function(data){
+   
+
+    let event = data.event;
+    let obj = data.obj;
+    
+    if(event == "spawn")
+    {
+        console.log("SPAWN", data)
+        
+        let x = obj.x || 0;
+        
+        let y = obj.y || 0;
+
+        let ogfx = $('<div>X</div>');
+
+        ogfx.addClass('test');
+
+        console.log(`#${x}-${y}`,$(`#${x}-${y}`).length );
+
+        $(`#${x}-${y}`).append( ogfx );  
+    }
+    
+});
 
 
 </script>

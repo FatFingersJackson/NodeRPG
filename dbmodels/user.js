@@ -8,11 +8,4 @@ var userScheme = new mongoose.Schema({
 mongoose.model('user',userScheme);
 var userModel = mongoose.model('user');
 
-/*
-userModel.create({
-    username:'Esko',
-    password:'pass1'
-});
-*/
-
 module.exports =  userModel;
