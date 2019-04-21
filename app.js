@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 
-
+var cors = require('cors')
 
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session)
@@ -17,7 +17,7 @@ const validator = require('express-validator');
 
 app = express();
 
-
+app.use(cors())
 
 
 app.use(express.static(path.join(__dirname, 'public')));
