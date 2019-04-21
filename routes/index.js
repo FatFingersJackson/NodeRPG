@@ -108,7 +108,8 @@ router.get('/', checkSession ,function(req, res,next) {
     res.render('template',{
         title: title,
         file: file,
-        username: req.session.username
+        username: req.session.username,
+        socketurl: process.env.SOCKETURL
     });
 });
 

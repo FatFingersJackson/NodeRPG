@@ -10,10 +10,10 @@
 <script src="/socket.io/socket.io.js"></script>      
 <script> 
     const playerUsername =  "<%= username %>" 
-    
+    const socketUrl = "<%= socketurl %>";
 </script>
 <script>
-        var socket = io.connect('https://sheltered-bastion-59048.herokuapp.com/', {secure: true});
+        var socket = io.connect(socketUrl, {secure: true});
      //var socket = io.connect("http://localhost:3000");
      
 </script>
