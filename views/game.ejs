@@ -178,7 +178,7 @@ socket.on('mapUpdate', function(data){
     let removed = data.remove;
     if(removed)
     {
-        console.log("Should remove removed")
+        
         for(let o of removed)
         {
             $('#'+o.objectId).remove();

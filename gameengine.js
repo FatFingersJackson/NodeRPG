@@ -94,7 +94,7 @@ async loadMap(mapname)
 }
 
 updateMapClients(update, remove){
-    console.log("remove",remove)
+    
     // When more maps, you have to add map name and select the users that update maps
     this.io.sockets.emit("mapUpdate", {update:update,remove:remove})
 
