@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session)
 
-const mongoose = require('mongoose');
+const mongoose = require('./dbconnection')
 
 const cookieParser = require('cookie-parser');
 const index = require('./routes/index')
@@ -40,6 +40,9 @@ app.use(cookieParser());
 
 // Store sessions in MongoDB instead of memory
 // to maintain stability and longer sessions
+// !! -- !! 
+// To use different database would require two different mongoose modules, so let us just use one db
+/*
 mongoose.connect(process.env.MONGOSESSIONCONNECT, 
     {
         useNewUrlParser: true, 
@@ -49,6 +52,7 @@ mongoose.connect(process.env.MONGOSESSIONCONNECT,
 
     console.log("Connect to session database");
 });
+*/
 
 
 let sessionSecret = process.env.SESSIONSECRET;

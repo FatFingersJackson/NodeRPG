@@ -13,6 +13,7 @@ let slime = {
     'type' : "creature",
     'objectName':"Red Slime",
     'description': "A red slime",
+    'objectId':'drrp'
 };
 
 let water = {
@@ -24,6 +25,8 @@ let water = {
     'type' : "terrain",
     'objectName':"Deep Water",
     'description': "Very deep water. Perhaps there is fish?",
+    'objectId':'splash01'
+    
 };
 
 let map = {
@@ -41,3 +44,13 @@ Map.create(map, function(err,res){
     console.log(res);
 
 })
+
+
+Map.find( (err,res) =>{
+        
+    if(err)
+    {return console.log("Could not load map", err);}
+
+    console.log("loaded map",res)
+
+} );

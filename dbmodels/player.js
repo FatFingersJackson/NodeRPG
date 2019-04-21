@@ -7,7 +7,13 @@ var playerScheme = new mongoose.Schema({
 })
 
 mongoose.model('player',playerScheme);
-var userModel = mongoose.model('player');
+var playerModel = mongoose.model('player');
 
 
-module.exports =  userModel;
+
+
+
+
+
+
+module.exports =  playerModel;

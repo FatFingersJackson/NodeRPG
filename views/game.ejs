@@ -12,44 +12,17 @@
 
 <script>
 
+// Used for database actions. This is later
+// to restrict possible pranks with username
 
-
-
-let sampleObjects = [
-    {
-        x: 2,
-        y: 7,
-        blocking : true,
-        objectClass :"slime_red",
-        name: "Red Slime"
-    },
-    {
-        x: 3,
-        y: 6,
-        blocking : true,
-        objectClass : "water_deep",
-        name: "Deep Water"   
-    }
-];
-
-var sampleMap = {
-    height: 10,
-    width: 10,
-    terrain: "grass",
-    mapObjects : sampleObjects, // <- for spawning
-    tiles : [] // <- for gameplay queries
-}
-// ------ --------/////
-// Above values will be loaded from file 
-// Current map will be assigned to a variable 
-// ------ --------/////
-
-//const map = sampleMap;
-
+var PLAYER_ID;
+var PLAYER_X = -1;
+var PLAYER_Y = -1;
 
 function draMap(map)
 {
     var tileGrid = "";
+    map.tiles = [];
     for (i = 0 ; i < map.height;i++)
     {
         map.tiles[i] = [];
@@ -73,13 +46,22 @@ function draMap(map)
         let y = o.y || 0;
         map.tiles[y][x] = o;
         let tileid = o.x + "-" + o.y;
-        // TODO needs ID
-        var mapO = `<div id="o${i}" class="${o.objectClass}"></div>`
+        let oid = o.objectId;
+        
+        console.log("append",oid,tileid);
+
+        $mapO = $(`<div id="${oid}" class="${o.objectClass}"></div>`);
         if(o.avatar)
         {
-            $(map0).append( `<img class="avatar" src="./images/${o.avatar}" />` )
+            console.log("add avatar")
+            $mapO.append( `<img class="avatar" src="./images/${o.avatar}" />` )
         }
-        $('#'+tileid).append(mapO);
+
+
+        
+        $('#'+tileid).append($mapO);
+
+        
     }
 }
 
@@ -130,25 +112,33 @@ $(document).on('click', function(){
     clearMessage();
 })
 
+function move(x, y)
+{
+    // TODO CHANGE from username so cheating harder
+    socket.emit("movePlayer",{ });
+}
+
 // These movefunctions are kind of single player
 function movePlayer(dirInt){
+
+    
 
     switch (dirInt) {
         //W
         case 119:
-            mainPlayer.move(0,-1);
+            move(0,-1);
             break;
             //A
         case 97:
-            mainPlayer.move(-1,0);
+            move(-1,0);
             break;
             //D
         case 100:
-            mainPlayer.move(1,0);
+            move(1,0);
             break;
             //S
         case 115:
-            mainPlayer.move(0,1);
+            move(0,1);
             break;
         default:
             break;
@@ -166,8 +156,11 @@ function clearMessage()
     $('#messagedialog').hide();
 }
 
+
+// ---- SOCKET EVENTS ---- // 
+
 socket.on('connect',function(){
-    socket.emit('playerSpawned',{ username: playerUsername })
+    socket.emit('registerConnection',{ username: playerUsername })
 });
 
 socket.on('message',function(data){
@@ -176,34 +169,45 @@ socket.on('message',function(data){
             });
 
 socket.on('loadMap',function(data){
-    console.log("loaded map",data.map)
+    
     draMap(data.map)
 });
 
 socket.on('mapUpdate', function(data){
    
+    let objects = data.update.mapObjects;
+    //console.log("Update map", objects)
 
-    let event = data.event;
-    let obj = data.obj;
-    
-    if(event == "spawn")
+    for( let o of objects )
     {
-        console.log("SPAWN", data)
-        
-        let x = obj.x || 0;
-        
-        let y = obj.y || 0;
 
-        let ogfx = $('<div>X</div>');
-
-        ogfx.addClass('test');
-
-        console.log(`#${x}-${y}`,$(`#${x}-${y}`).length );
-
-        $(`#${x}-${y}`).append( ogfx );  
+        if($('#'+o.objectId).length > 0 )
+        {
+            console.log(o.x,o.y)
+            $(`#${o.x}-${o.y}`).append( $('#'+o.objectId) )
+            //let og = $('#'+o.objectId);
+        }
+        else{
+            createObject(o);
+        }
     }
-    
 });
+
+function createObject(obj)
+{
+    console.log("create object" , obj);
+    
+    let oid = obj.objectId;
+    let oclass = obj.objectClass;
+
+    $mapO = $(`<div id="${oid}" class="${oclass}"></div>`);
+        if(obj.avatar)
+        {
+            console.log("add avatar")
+            $mapO.append( `<img class="avatar" src="./images/${obj.avatar}" />` )
+        }
+        $('#'+tileid).append($mapO);
+}
 
 
 </script>

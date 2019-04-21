@@ -1,72 +1,188 @@
 const Map = require('./dbmodels/map');
+const Connection = require('./dbmodels/userconnection');
+const MapObject = require('./dbmodels/mapobject');
+const userDB = require('./dboperations/playerdb');
 
 class GameEngine
 {
 
 
+saveConnection(uname, connid)
+{
+    let timestamp = new Date();
+
+    Connection.findOneAndUpdate(
+        {username:uname},
+        { $set: {username:uname ,connectionId: connid, 'connectTime': timestamp }},
+        {new: true,upsert: true,},
+        function(err,doc,res){
+
+            if(err){return console.log(err);}
+            
+            // returns added object
+            if(doc){
+                console.log("connected", doc.connectionId, doc.username)
+            };
+            if(res)
+            {
+                //console.log("updated",uname, res);
+            }
+            else
+            {
+                //console.log("did not find anyone to update, so created new")
+            }
+        });
+}
+
+removeConnection(connId)
+{
+
+    let mapname = "testmap";    
+
+
+    Connection.findOneAndDelete(
+        { connectionId:connId },
+        (err,res) => {
+            if(err){return console.log("Error removing connection", err); }
+            try{
+                console.log("disconnected", res.connectionId,res.username);
+
+                Map.findOneAndUpdate(
+                    {mapname:mapname}, 
+                    {
+                        '$pull':{
+                            'mapObjects':{ objectId : res.username }
+                        }
+                    },
+                    (err,res)=>
+                    {
+                        if(err){return console.log(err);}
+
+                        console.log("REMOVEUSER", res);
+                    } 
+                );
+
+
+
+            }catch(err)
+            { console.log(err, res);}
+        })
+}
+
+async loadMap(mapname)
+{
+    let map = await Map.findOne({mapname:mapname});
+    return map;
+}
+
+async updateMap(mapname,obj)
+{
+    mapname = "testmap";
+
+    let res = null;
+
+    try{
+        res = await Map.findOneAndUpdate(
+            {mapname:mapname, "mapObjects.objectId":obj.objectId },
+            {$set:{"mapObjects.$": obj } },
+            {new:true}
+        );
+    }catch(err)
+    {
+        console.log("Error updating map", err)
+    }
+    
+    if(!res)
+    {
+        let newObj = MapObject(obj);
+        console.log("No obj found","Spawning")
+        try{
+            res = await Map.findOneAndUpdate(
+                {mapname:mapname},
+                { $push: {mapObjects: newObj } },
+                {new: true}
+            );
+            //res = quer.mapObjects;
+        }catch(err)
+        {
+            console.log("Error updating map", err);
+        }
+    }
+
+    console.log("Updated map");
+    this.updateMapClients(res)
+}
+
+updateMapClients(update){
+    // When more maps, you have to add map name and select the users that update maps
+    this.io.sockets.emit("mapUpdate", {update:update})
+
+}
+
+movePlayer(data)
+{
+    /*
+    mapname = "testmap"
+
+    let objectId = data.objectId;
+    let x = data.x;
+    let y = data.y;
+    console.log("Moving " + objectId + " player to " + x+","+y)
+
+    Map.findOneAndUpdate(
+        {mapname:mapname, "mapObjects.objectId":obj.objectId },
+        {$inc: { views: 1}}
+        )
+    */
+}
+
 constructor(io)
 {
-    
+    this.io = io;
+    io.on('connection',(socket)=>{
+        
+        socket.on('registerConnection',async (data)=>{
+            let uname = data.username;
+            // Add player connection to the active connections list
+            this.saveConnection(uname, socket.id);
+            
+            // Get this from players db
+            
+            let playerObject = userDB.loadPlayer(uname)
+
+            
+            
+            // Load map for user
+            let map =  await this.loadMap("testmap");
+            socket.emit("loadMap", {map:map} )
+
+            //Add user to the map
+            this.updateMap("tesmap",playerObject);
+
+            socket.on("movePlayer",this.movePlayer);
+
+        })
+
+        
+
+        socket.on('disconnect',()=>{
+            
+            //Remove user from map
+            
+            // Remove user connection
+            this.removeConnection(socket.id)
+
+            
+            
+            
+            
+        })
+
+    });
 }
 
 /*
-    loadMap(mapName){
-
-        // DEV PHASE
-        // When player enters a map, map is loaded from file
-        // then added to active list. When another player enters, 
-        // changes are added into common memory
-        // WHEN TESTED
-        // move maps to db
-
-        let sampleObjects = [
-            {
-                x: 2,
-                y: 7,
-                blocking : true,
-                objectClass :"slime_red",
-                type:"creature",
-                id: "rls01", // TODO better id's. Autogenerate?
-                name: "Red Slime"
-            },
-            {
-                x: 3,
-                y: 6,
-                blocking : true,
-                type: "terrain",
-                objectClass : "water_deep",
-                id: "water001",
-                name: "Deep Water"   
-            }
-        ];
-        
-        var sampleMap = {
-            height: 10,
-            width: 10,
-            terrain: "grass",
-            mapObjects : sampleObjects, // <- for spawning
-            tiles : [] // <- for gameplay queries
-        }
-        
-        return sampleMap;
-    } // <-- loadMap
-
-    // TODO
-    // later load from database
-    loadPlayer(uname){
-        
-        let player = {
-            
-            id: uname,// Later id in database
-            map_id: uname,
-            username: uname,
-            map: "testmap",
-            avatar: "stiki.png"
-        };
-
-
-        return player;
-    }
+    
 
    
 

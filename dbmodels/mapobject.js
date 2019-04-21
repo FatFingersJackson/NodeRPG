@@ -8,6 +8,9 @@ let mapObjectScheme = new mongoose.Schema({
     'type':String,
     'objectName':String,
     'description':String,
+    'image':String,
+    'objectId':String,
+    'avatar': String
 }); 
 
 mongoose.model("mapObject", mapObjectScheme);
