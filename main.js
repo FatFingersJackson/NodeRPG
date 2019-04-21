@@ -7,7 +7,10 @@ const io = require('socket.io').listen(server);
 const ge = require('./gameengine');
 const GameEngine = new ge(io);
 
-let port  = 3000;
+// Heroku app gets port from environmental variable
+let port = process.env.PORT;
+if(!port)
+{ port  = 3000; }
 
 server.listen(port,function(){
     console.log("Listening on port " + port);

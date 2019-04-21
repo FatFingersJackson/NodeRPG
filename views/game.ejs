@@ -174,7 +174,17 @@ socket.on('loadMap',function(data){
 });
 
 socket.on('mapUpdate', function(data){
-   
+    
+    let removed = data.remove;
+    if(removed)
+    {
+        console.log("Should remove removed")
+        for(let o of removed)
+        {
+            $('#'+o.objectId).remove();
+        }
+    }
+
     let objects = data.update.mapObjects;
     //console.log("Update map", objects)
 
@@ -183,7 +193,7 @@ socket.on('mapUpdate', function(data){
 
         if($('#'+o.objectId).length > 0 )
         {
-            console.log(o.x,o.y)
+            //console.log(o.x,o.y)
             $(`#${o.x}-${o.y}`).append( $('#'+o.objectId) )
             //let og = $('#'+o.objectId);
         }

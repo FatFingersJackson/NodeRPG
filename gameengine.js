@@ -43,17 +43,16 @@ removeConnection(connId, uname)
     var arr = map.mapObjects;
     
     let index = arr.findIndex(x => x.objectId === uname );
-
-    console.log("removing mapobject nro", index);
+    let removed = [ arr[index] ]
+    
     try{
         arr.splice(index,1);
+        this.updateMapClients(map, removed);
     }catch(err)
     {
         console.log(err);
     }
     
-    
-
     Connection.findOneAndDelete(
         { connectionId:connId },
         (err,res) => {
@@ -71,7 +70,7 @@ async loadMap(mapname)
     return map;
 }
 
- updateMap(mapname,obj)
+ updateMap(mapname,obj, remove = null)
 {
     mapname = "testmap";
     let map = this.maps[mapname];
@@ -91,9 +90,10 @@ async loadMap(mapname)
     this.updateMapClients( map  )
 }
 
-updateMapClients(update){
+updateMapClients(update, remove){
+    console.log("remove",remove)
     // When more maps, you have to add map name and select the users that update maps
-    this.io.sockets.emit("mapUpdate", {update:update})
+    this.io.sockets.emit("mapUpdate", {update:update,remove:remove})
 
 }
 
@@ -125,7 +125,7 @@ movePlayer(socket,data){
     {
         player.x = dx;
         player.y = dy;
-        console.log(socket.username,"moving to",dx,dy)
+        
         this.updateMapClients( map  )
     }else{
         console.log("out of bounds",dx,dy)
@@ -137,13 +137,14 @@ saveMaps()
 {
     // In case there were more maps
     let maps = this.maps;
-    for(let map of maps)
+    for(let key in maps)
     {
-
         // Save map to database
-
         // Check if there are no players in map -> remove from active memory
+        if(map.hasOwnProperty(key))
+        {
 
+        }
     }
 }
 

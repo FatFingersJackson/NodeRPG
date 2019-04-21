@@ -14,7 +14,7 @@ module.exports.loadPlayer = function(uname){
         return  {
             'x':0,
             'y':0,
-            'blocking': false,
+            'blocking': true,
             'objectClass': "player",
             'type' : "player",
             'objectName':"Player " + uname,
@@ -27,7 +27,7 @@ module.exports.loadPlayer = function(uname){
         return {
             'x':0,
             'y':0,
-            'blocking': false,
+            'blocking': true,
             'objectClass': "player",
             'type' : "player",
             'objectName':"Player " + uname,

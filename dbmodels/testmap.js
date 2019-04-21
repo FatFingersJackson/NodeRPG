@@ -45,12 +45,3 @@ Map.create(map, function(err,res){
 
 })
 
-
-Map.find( (err,res) =>{
-        
-    if(err)
-    {return console.log("Could not load map", err);}
-
-    console.log("loaded map",res)
-
-} );
