@@ -3,6 +3,9 @@ const Connection = require('./dbmodels/userconnection');
 const MapObject = require('./dbmodels/mapobject');
 const userDB = require('./dboperations/playerdb');
 
+//TODO
+const testmap = require('./dbmodels/testmap');
+
 class GameEngine
 {
 
