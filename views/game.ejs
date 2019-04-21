@@ -115,7 +115,7 @@ $(document).on('click', function(){
 function move(x, y)
 {
     // TODO CHANGE from username so cheating harder
-    socket.emit("movePlayer",{ });
+    socket.emit("movePlayer",{ x:x,y:y});
 }
 
 // These movefunctions are kind of single player
@@ -169,7 +169,7 @@ socket.on('message',function(data){
             });
 
 socket.on('loadMap',function(data){
-    
+    console.log(data)
     draMap(data.map)
 });
 
@@ -199,6 +199,7 @@ function createObject(obj)
     
     let oid = obj.objectId;
     let oclass = obj.objectClass;
+    let tileid = `#${obj.x}-${obj.y}`;
 
     $mapO = $(`<div id="${oid}" class="${oclass}"></div>`);
         if(obj.avatar)
@@ -206,7 +207,7 @@ function createObject(obj)
             console.log("add avatar")
             $mapO.append( `<img class="avatar" src="./images/${obj.avatar}" />` )
         }
-        $('#'+tileid).append($mapO);
+        $(tileid).append($mapO);
 }
 
 

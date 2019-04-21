@@ -34,51 +34,217 @@ saveConnection(uname, connid)
         });
 }
 
-removeConnection(connId)
+removeConnection(connId, uname)
 {
 
-    let mapname = "testmap";    
+    let mapname = "testmap";
+    let map = this.maps[mapname];
 
+    var arr = map.mapObjects;
+    
+    let index = arr.findIndex(x => x.objectId === uname );
+
+    console.log("removing mapobject nro", index);
+    try{
+        arr.splice(index,1);
+    }catch(err)
+    {
+        console.log(err);
+    }
+    
+    
 
     Connection.findOneAndDelete(
         { connectionId:connId },
         (err,res) => {
             if(err){return console.log("Error removing connection", err); }
             try{
-                console.log("disconnected", res.connectionId,res.username);
-
-                Map.findOneAndUpdate(
-                    {mapname:mapname}, 
-                    {
-                        '$pull':{
-                            'mapObjects':{ objectId : res.username }
-                        }
-                    },
-                    (err,res)=>
-                    {
-                        if(err){return console.log(err);}
-
-                        console.log("REMOVEUSER", res);
-                    } 
-                );
-
-
-
             }catch(err)
             { console.log(err, res);}
-        })
+         });
 }
 
 async loadMap(mapname)
 {
     let map = await Map.findOne({mapname:mapname});
+    this.maps["testmap"] = map;
     return map;
 }
 
-async updateMap(mapname,obj)
+ updateMap(mapname,obj)
 {
     mapname = "testmap";
+    let map = this.maps[mapname];
 
+    var arr = map.mapObjects;
+    
+    let index = arr.findIndex(x=> x.objectId == obj.objectId);
+
+    if(index < 0)
+    { arr.push(obj); }
+    else
+    {
+        arr[index] = obj;
+    }
+
+    
+    this.updateMapClients( map  )
+}
+
+updateMapClients(update){
+    // When more maps, you have to add map name and select the users that update maps
+    this.io.sockets.emit("mapUpdate", {update:update})
+
+}
+
+movePlayer(socket,data){
+
+    let mapname = "testmap";
+    let map = this.maps[mapname];
+
+    let mw = map.width;
+    let mh = map.height;
+
+    var arr = map.mapObjects;
+    let index = arr.findIndex(x=> x.objectId == socket.username);
+    
+    let player = arr[index];
+    
+    let px = player.x;
+    let py = player.y;
+
+    let dx = px + data.x;
+    let dy = py + data.y;
+
+    let blockIndex = arr.findIndex(x=> x.x === dx && x.y === dy);
+    if( blockIndex >= 0 && arr[blockIndex].blocking === true)
+    {
+        console.log("blocked" )
+    }
+    else if (dx >= 0 && dy >= 0 && dy < mh && dx < mw  )
+    {
+        player.x = dx;
+        player.y = dy;
+        console.log(socket.username,"moving to",dx,dy)
+        this.updateMapClients( map  )
+    }else{
+        console.log("out of bounds",dx,dy)
+    }
+    
+}
+
+saveMaps()
+{
+    // In case there were more maps
+    let maps = this.maps;
+    for(let map of maps)
+    {
+
+        // Save map to database
+
+        // Check if there are no players in map -> remove from active memory
+
+    }
+}
+
+// Get map from active memory. If it does not exist there, load it frm db
+async getMap(mapname)
+{
+    let map = this.maps[mapname];
+    if(map == null)
+    {
+         map = await this.loadMap(mapname);
+         this.maps[mapname] = map;
+    }
+
+    return map;
+}
+
+ constructor(io)
+{
+    this.io = io;
+
+    // Store objects with mapnames
+    this.maps = {};
+    this.loadMap("testmap");
+    this.saveMaps();
+
+    io.on('connection',(socket)=>{
+        
+        socket.on('registerConnection',async (data)=>{
+            let uname = data.username;
+            // Add player connection to the active connections list
+            this.saveConnection(uname, socket.id);
+            
+            socket.username = uname;
+            // Get this from players db
+            
+            let playerObject = userDB.loadPlayer(uname)
+
+            // Load map for user
+            // Too heacy solution
+            //let map =  await this.loadMap("testmap");
+            let mapname = "testmap";
+            let map = this.maps[mapname];
+            socket.emit("loadMap", {map:map} )
+
+            //Add user to the map
+            // Too heavy method
+            this.updateMap("testmap",playerObject);
+
+            socket.on("movePlayer",(data)=>{this.movePlayer(socket,data)});
+        })
+
+        
+
+        socket.on('disconnect',()=>{
+            
+            //Remove user from map
+            // Remove user connection
+            this.removeConnection(socket.id,socket.username)
+
+            
+        })
+
+    });
+}
+
+}
+
+module.exports = GameEngine;
+
+
+
+
+
+
+
+
+
+
+//DEPRECATED FOR BEING TOO HEAVY
+/*
+movePlayer(data)
+{
+
+    console.log("MOVE",data)
+    
+    mapname = "testmap"
+
+    let objectId = data.objectId;
+    let x = data.x;
+    let y = data.y;
+    console.log("Moving " + objectId + " player to " + x+","+y)
+
+    Map.findOneAndUpdate(
+        {mapname:mapname, "mapObjects.objectId":obj.objectId },
+        {$inc: { views: 1}}
+        )
+    
+}*/
+
+
+ /* UPDATEMAP
     let res = null;
 
     try{
@@ -108,204 +274,42 @@ async updateMap(mapname,obj)
             console.log("Error updating map", err);
         }
     }
-
-    console.log("Updated map");
-    this.updateMapClients(res)
-}
-
-updateMapClients(update){
-    // When more maps, you have to add map name and select the users that update maps
-    this.io.sockets.emit("mapUpdate", {update:update})
-
-}
-
-movePlayer(data)
-{
-    /*
-    mapname = "testmap"
-
-    let objectId = data.objectId;
-    let x = data.x;
-    let y = data.y;
-    console.log("Moving " + objectId + " player to " + x+","+y)
-
-    Map.findOneAndUpdate(
-        {mapname:mapname, "mapObjects.objectId":obj.objectId },
-        {$inc: { views: 1}}
-        )
-    */
-}
-
-constructor(io)
-{
-    this.io = io;
-    io.on('connection',(socket)=>{
-        
-        socket.on('registerConnection',async (data)=>{
-            let uname = data.username;
-            // Add player connection to the active connections list
-            this.saveConnection(uname, socket.id);
-            
-            // Get this from players db
-            
-            let playerObject = userDB.loadPlayer(uname)
-
-            
-            
-            // Load map for user
-            let map =  await this.loadMap("testmap");
-            socket.emit("loadMap", {map:map} )
-
-            //Add user to the map
-            this.updateMap("tesmap",playerObject);
-
-            socket.on("movePlayer",this.movePlayer);
-
-        })
-
-        
-
-        socket.on('disconnect',()=>{
-            
-            //Remove user from map
-            
-            // Remove user connection
-            this.removeConnection(socket.id)
-
-            
-            
-            
-            
-        })
-
-    });
-}
-
-/*
-    
-
-   
-
-    constructor(io)
-    {
-        // TODO DEV store mapchanges here
-        this.activeMaps = [];
-        let map = this.loadMap();
-        this.activeMaps["testmap"] = map;
-        
-        this.playerConnectionList = [];    
-        // FIX 
-        this.updatePlayer = (userObject, socket)=>{
-            
-            var existing = this.playerConnectionList.filter(obj => {
-                return obj.username == userObject.username;
-            });
-            
-            console.log("Existing",userObject.username,existing.length)
-            if(existing.length > 0)
-            {
-                // iterate new values and update
-            
-            }
-            else
-            {
-                this.playerConnectionList.push({socket:socket.id, username:userObject.username });
-            }
-            console.log("Connections", this.playerConnectionList)
-            var update = {};
-
-            // save player to db
-
-            // update changes to client
-        } // <- Update Player
-        
-       
-
-        // The map parameter comes in play when there are multiple maps
-        this.updateMap = function(obj, event, map)
-        {
-            // map where player is at the moment should actually be loaded from database.
-            if(!map)
-            {map == "testmap"}
-
-            if(event == "spawn")
-            {
-                // Is player on map already?
-                let index = this.activeMaps["testmap"]["mapObjects"].map(function(e){return e.username}).indexOf(obj.username);
-
-                if( index >= 0 )
-                {
-                    console.log("player spawn", "already existed in index",index, "refresh")   
-                    
-                }
-                else{
-                    console.log("player spawn", "new player")   
-                    this.activeMaps["testmap"]["mapObjects"].push( obj);
-                }
-            }
-            else 
-            {
-                // iterate
-            }
-
-            // TODO
-            io.sockets.emit("mapUpdate",{obj:obj,event:event})
-        }
-
-        // NOTE: use arrow functions so the inner this.-functions refer to the class
-        io.on('connection',(socket)=>{
-        
-        // ADD player on the active list and fetch stats
-        socket.on('playerSpawned', (data) => 
-        {
-            let uname = data.username;
-
-            let player = this.loadPlayer(uname);
-
-            // Add player to connection list
-            this.updatePlayer(player,socket);
-            
-            // Add player to the server map -> all clients
-            this.updateMap({id:uname,objectClass:"player", type:"player"}, "spawn");
-
-            socket.emit("message",{message:"Hello " + uname + "!"} );
-            
-            // Load map to user
-            // TODO, Get real map from user.location
-            //let newMap = this.activeMaps[player.map];
-            
-            // Loading map
-            Map.findOne({mapname: "testmap"},(err, res)=>{
-                if(err) {return console.log(err);}
-                else{
-                    console.log("Loaded Map" , res)
-                    //socket.emit('loadMap', { map: newMap });
-                }
-            });
-            
-            //console.log("load map",newMap)
-            //
-            
-        });
-
-        // Player updated on client. 
-        socket.on('playerUpdated',(data)=>{
-                this.updatePlayer(data, socket)
-            });
-        
-            socket.on('disconnect',() => {
-                let index = this.playerConnectionList.map(function(e){return e.socket}).indexOf(socket.id);
-                
-                if( index < 0 ){ console.log("Error removing player connection",socket.id) }
-                else{
-                    this.playerConnectionList.slice(index,1);
-                    console.log("disconnected",socket.id, this.playerConnectionList[index].username );
-                }
-            })
-        }); // io.on
-
-    } // Constructor
 */
-}
 
-module.exports = GameEngine;
+
+
+
+
+/* DISCONNECT 
+
+    Connection.findOneAndDelete(
+        { connectionId:connId },
+        (err,res) => {
+            if(err){return console.log("Error removing connection", err); }
+            try{
+                console.log("disconnected", res.connectionId,res.username);
+
+                Map.findOneAndUpdate(
+                    {mapname:mapname}, 
+                    {
+                        '$pull':{
+                            'mapObjects':{ objectId : res.username }
+                        }
+                    },
+                    (err,res)=>
+                    {
+                        if(err){
+                            // TODO
+                            // force sockets to send new connection, then compare to list
+                            // And remove those that did not answer
+                            return console.log("CANNOT FIND CONNECTION",err);
+                        }
+
+                        console.log("REMOVEUSER", res);
+                    } 
+                );
+            }catch(err)
+            { console.log(err, res);}
+        })
+        */
+
