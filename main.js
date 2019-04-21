@@ -3,6 +3,8 @@ var app = require('./app');
 var server = require('http').createServer(app);
 
 const io = require('socket.io').listen(server);
+// Heroku setting
+io.set('origins', '*:*');
 
 const ge = require('./gameengine');
 const GameEngine = new ge(io);

@@ -16,7 +16,7 @@ var path = require('path');
 const validator = require('express-validator');
 
 app = express();
-
+// Heroku need for Socket
 app.use(cors())
 
 
