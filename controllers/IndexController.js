@@ -1,3 +1,10 @@
+const User = require("../dbmodels/user")
+const bcrypt = require('bcryptjs')
+
+const jwt = require('jsonwebtoken');
+
+let sess;
+
 module.exports.login_get = function(req,res,next){
     
     // If logged in

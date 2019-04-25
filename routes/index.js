@@ -1,37 +1,15 @@
 const express = require('express');
 const router = express.Router();
-require('dotenv').config();
-const path = require('path')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken');
 
-const User = require("../dbmodels/user")
+
+
+
 
 const indexController = require('../controllers/IndexController')
 
-let sess;
 
-function checkSession(req,res,next)
-{
-    let session = req.session;
-    let token = session.token;
-    
-    if(!token){return res.redirect('/login'); }
-    else{
-        jwt.verify(token, process.env.JWTSECRET ,function(err,decoded){
-            if(err) 
-            {
-                return res.status(500).send({auth:false,message:'Failed to authenticate token'});
-            }
 
-            // OK
-            session.username = decoded.username;
-            next();
-        })
-    }
-
-    next();
-}
+const checkSession = require('../controllers/SessionValidator');
 
 router.get('/login',indexController.login_get);
 
