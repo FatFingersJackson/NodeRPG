@@ -1,3 +1,5 @@
+The purpose of this application is to showcase the skills and understaning in some areas of NodeJS - developing. To implement some subjects of the course, in some points it knowingly avoids some best practices. Viewing the code should be done with this in mind.
+
 Trying to get the app working in :
 
 [heroku](https://sheltered-bastion-59048.herokuapp.com/)
